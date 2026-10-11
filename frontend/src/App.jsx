@@ -79,7 +79,7 @@ function App() {
 
         localStorage.setItem("token", data.token);
 
-        alert("Login successful!");
+        setPage("dashboard");
       } catch (error) {
         alert("Cannot connect to server. Check your backend.");
       }
@@ -132,6 +132,32 @@ function App() {
           </button>
         </main>
       )}
+
+      
+      {page === "dashboard" && (
+        <main className="hero">
+          <p className="tagline">TASKFLOW DASHBOARD</p>
+
+          <h1>Welcome to TaskFlow!</h1>
+
+          <p className="description">
+            You are logged in successfully.
+            Start organizing your tasks here.
+          </p>
+
+          <button
+            className="start-btn"
+            onClick={() => {
+              localStorage.removeItem("token");
+              setPage("home");
+            }}
+          >
+            Logout
+          </button>
+        </main>
+      )}
+
+
     </div>
   );
 }
