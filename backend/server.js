@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const taskRoutes = require("./routes/taskRoutes");
 require("dotenv").config();
 
 const authMiddleware = require("./middleware/authMiddleware");
@@ -11,8 +12,8 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use("/api/tasks", taskRoutes);
 
 app.get("/api/auth/me", authMiddleware, (req, res) => {
     res.status(200).json({
