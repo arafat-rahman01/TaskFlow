@@ -87,3 +87,31 @@ body {
 .login-form .start-btn {
   width: 100%;
 }
+
+
+.task-list {
+  max-width: 600px;
+  margin: 25px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.task-card {
+  padding: 20px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.task-card h3 {
+  color: #4f46e5;
+  margin-bottom: 10px;
+}
+
+.task-card p {
+  color: #64748b;
+  margin-top: 8px;
+}
