@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import "./App.css";
 
 function App() {
   const [page, setPage] = useState("home");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   return (
     <div className="app">
