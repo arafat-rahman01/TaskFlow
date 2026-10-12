@@ -9,6 +9,45 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  
+  useEffect(() => {
+    if (page !== "dashboard") return;
+
+    const fetchTasks = async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const token = localStorage.getItem("token");
+
+        const response = await fetch(
+          "http://localhost:5000/api/tasks",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to load tasks");
+        }
+
+        setTasks(data.tasks || data);
+      } catch (err) {
+        setError(err.message || "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTasks();
+  }, [page]);
+
+
   return (
     <div className="app">
       <nav className="navbar">
