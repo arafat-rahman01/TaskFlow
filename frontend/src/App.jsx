@@ -175,28 +175,51 @@ function App() {
       )}
 
       
-      {page === "dashboard" && (
-        <main className="hero">
-          <p className="tagline">TASKFLOW DASHBOARD</p>
+      
+    {page === "dashboard" && (
+      <main className="hero">
+        <p className="tagline">TASKFLOW DASHBOARD</p>
 
-          <h1>Welcome to TaskFlow!</h1>
+        <h1>Welcome to TaskFlow!</h1>
 
-          <p className="description">
-            You are logged in successfully.
-            Start organizing your tasks here.
-          </p>
+        <p className="description">
+          Manage your academic tasks in one place.
+        </p>
 
-          <button
-            className="start-btn"
-            onClick={() => {
-              localStorage.removeItem("token");
-              setPage("home");
-            }}
-          >
-            Logout
-          </button>
-        </main>
-      )}
+        {loading && <p>Loading tasks...</p>}
+
+        {error && <p style={{ color: "red" }}>{error}</p>}
+
+        {!loading && !error && tasks.length === 0 && (
+          <p>No tasks found. Add your first task soon!</p>
+        )}
+
+        <div className="task-list">
+          {tasks.map((task) => (
+            <div className="task-card" key={task._id}>
+              <h3>{task.title}</h3>
+
+              <p>{task.description || "No description"}</p>
+
+              <p>
+                Status: {task.completed ? "Completed" : "Pending"}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <button
+          className="start-btn"
+          onClick={() => {
+            localStorage.removeItem("token");
+            setPage("home");
+          }}
+        >
+          Logout
+        </button>
+      </main>
+    )}
+
 
 
     </div>
