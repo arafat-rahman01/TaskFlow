@@ -191,10 +191,43 @@ function App() {
         
         <form
           className="task-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            alert("Add Task form submitted!");
-          }}
+          
+        onSubmit={async (e) => {
+          e.preventDefault();
+
+          try {
+            const token = localStorage.getItem("token");
+
+            const response = await fetch(
+              "http://localhost:5000/api/tasks",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ title, description }),
+              }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+              throw new Error(data.message || "Failed to add task");
+            }
+
+            const newTask = data.task || data;
+
+            setTasks((prevTasks) => [newTask, ...prevTasks]);
+            setTitle("");
+            setDescription("");
+
+            alert("Task added successfully!");
+          } catch (err) {
+            alert(err.message || "Something went wrong");
+          }
+        }}
+
         >
           <h2>Add New Task</h2>
 
