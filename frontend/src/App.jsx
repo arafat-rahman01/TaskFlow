@@ -10,6 +10,8 @@ function App() {
   const [error, setError] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [editingTaskId, setEditingTaskId] = useState(null);
+
 
   
   const handleToggleTask = async (task) => {
@@ -49,6 +51,13 @@ function App() {
       alert("Server connection failed!");
     }
   };
+
+  
+    const handleEditTask = (task) => {
+      setEditingTaskId(task._id);
+      setTitle(task.title);
+      setDescription(task.description || "");
+    };
 
   
   useEffect(() => {
