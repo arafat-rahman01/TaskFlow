@@ -12,6 +12,45 @@ function App() {
   const [description, setDescription] = useState("");
 
   
+  const handleToggleTask = async (task) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        `http://localhost:5000/api/tasks/${task._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            completed: !task.completed,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message || "Failed to update task");
+        return;
+      }
+
+      setTasks((prevTasks) =>
+        prevTasks.map((item) =>
+          item._id === task._id
+            ? { ...item, completed: !task.completed }
+            : item
+        )
+      );
+    } catch (error) {
+      console.error("Update task error:", error);
+      alert("Server connection failed!");
+    }
+  };
+
+  
   useEffect(() => {
     if (page !== "dashboard") return;
 
@@ -271,14 +310,14 @@ function App() {
                 Status: {task.completed ? "Completed" : "Pending"}
               </p>
               
+              
               <button
                 className="start-btn"
-                onClick={() => {
-                  alert("Next step: connect the Update Task API!");
-                }}
+                onClick={() => handleToggleTask(task)}
               >
                 {task.completed ? "Mark Pending" : "Mark Completed"}
               </button>
+
 
             </div>
           ))}
