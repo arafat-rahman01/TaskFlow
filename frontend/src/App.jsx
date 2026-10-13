@@ -270,6 +270,16 @@ function App() {
               <p>
                 Status: {task.completed ? "Completed" : "Pending"}
               </p>
+              
+              <button
+                className="start-btn"
+                onClick={() => {
+                  alert("Next step: connect the Update Task API!");
+                }}
+              >
+                {task.completed ? "Mark Pending" : "Mark Completed"}
+              </button>
+
             </div>
           ))}
         </div>
