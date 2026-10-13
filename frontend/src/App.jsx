@@ -188,6 +188,37 @@ function App() {
           Manage your academic tasks in one place.
         </p>
 
+        
+        <form
+          className="task-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            alert("Add Task form submitted!");
+          }}
+        >
+          <h2>Add New Task</h2>
+
+          <input
+            type="text"
+            placeholder="Enter task title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
+
+          <textarea
+            placeholder="Enter task description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows="3"
+          />
+
+          <button type="submit" className="start-btn">
+            + Add Task
+          </button>
+        </form>
+
+
         {loading && <p>Loading tasks...</p>}
 
         {error && <p style={{ color: "red" }}>{error}</p>}
