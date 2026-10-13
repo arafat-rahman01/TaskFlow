@@ -115,3 +115,35 @@ body {
   color: #64748b;
   margin-top: 8px;
 }
+
+
+.task-form {
+  max-width: 600px;
+  margin: 30px auto;
+  padding: 24px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  text-align: left;
+}
+
+.task-form h2 {
+  color: #172033;
+  margin-bottom: 5px;
+}
+
+.task-form input,
+.task-form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.task-form textarea {
+  resize: vertical;
+}
