@@ -8,6 +8,7 @@ function App() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [filter, setFilter] = useState("All");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [editingTaskId, setEditingTaskId] = useState(null);
@@ -133,7 +134,18 @@ function App() {
 
     fetchTasks();
   }, [page]);
+    
+  const filteredTasks = tasks.filter((task) => {
+    if (filter === "Pending") {
+      return !task.completed;
+    }
 
+    if (filter === "Completed") {
+      return task.completed;
+    }
+
+    return true;
+  });
 
   return (
     <div className="app">
@@ -383,8 +395,28 @@ function App() {
           <p>No tasks found. Add your first task soon!</p>
         )}
 
+        
+        <div className="task-filters">
+          {["All", "Pending", "Completed"].map((status) => (
+            <button
+              key={status}
+              type="button"
+              className="login-btn"
+              onClick={() => setFilter(status)}
+              style={{
+                marginRight: "10px",
+                backgroundColor:
+                  filter === status ? "#2563eb" : undefined,
+                color: filter === status ? "white" : undefined,
+              }}
+            >
+              {status}
+            </button>
+          ))}
+        </div>
+
         <div className="task-list">
-          {tasks.map((task) => (
+          {filteredTasks.map((task) => (
             <div className="task-card" key={task._id}>
               
               <h3>{task.title}</h3>
@@ -397,6 +429,7 @@ function App() {
               
               
               <button
+                type="button"
                 className="start-btn"
                 onClick={() => handleToggleTask(task)}
               >
