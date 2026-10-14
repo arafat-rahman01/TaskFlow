@@ -60,6 +60,7 @@ function App() {
     };
 
   
+    
   useEffect(() => {
     if (page !== "dashboard") return;
 
@@ -237,67 +238,105 @@ function App() {
         </p>
 
         
-        <form
-          className="task-form"
-          
+        
+      <form
+        className="task-form"
         onSubmit={async (e) => {
           e.preventDefault();
 
           try {
             const token = localStorage.getItem("token");
 
-            const response = await fetch(
-              "http://localhost:5000/api/tasks",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ title, description }),
-              }
-            );
+            const isEditing = editingTaskId !== null;
+
+            const url = isEditing
+              ? `http://localhost:5000/api/tasks/${editingTaskId}`
+              : "http://localhost:5000/api/tasks";
+
+            const response = await fetch(url, {
+              method: isEditing ? "PUT" : "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ title, description }),
+            });
 
             const data = await response.json();
 
             if (!response.ok) {
-              throw new Error(data.message || "Failed to add task");
+              throw new Error(
+                data.message || "Failed to save task"
+              );
             }
 
-            const newTask = data.task || data;
+            if (isEditing) {
+              const updatedTask = data.task || data;
 
-            setTasks((prevTasks) => [newTask, ...prevTasks]);
+              setTasks((prevTasks) =>
+                prevTasks.map((task) =>
+                  task._id === editingTaskId
+                    ? { ...task, ...updatedTask }
+                    : task
+                )
+              );
+
+              alert("Task updated successfully!");
+            } else {
+              const newTask = data.task || data;
+
+              setTasks((prevTasks) => [
+                newTask,
+                ...prevTasks,
+              ]);
+
+              alert("Task added successfully!");
+            }
+
             setTitle("");
             setDescription("");
+            setEditingTaskId(null);
 
-            alert("Task added successfully!");
           } catch (err) {
             alert(err.message || "Something went wrong");
           }
         }}
+      >
+        <h2>{editingTaskId !== null ? "Edit Task" : "Add New Task"}</h2>
 
-        >
-          <h2>Add New Task</h2>
+        <input
+          type="text"
+          placeholder="Enter task title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
 
-          <input
-            type="text"
-            placeholder="Enter task title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
+        <textarea
+          placeholder="Enter task description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows="3"
+        />
 
-          <textarea
-            placeholder="Enter task description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows="3"
-          />
+        <button type="submit" className="start-btn">
+          {editingTaskId !== null ? "Save Changes" : "+ Add Task"}
+        </button>
 
-          <button type="submit" className="start-btn">
-            + Add Task
+        {editingTaskId !== null && (
+          <button
+            type="button"
+            className="login-btn"
+            onClick={() => {
+              setEditingTaskId(null);
+              setTitle("");
+              setDescription("");
+            }}
+          >
+            Cancel Edit
           </button>
-        </form>
+        )}
+      </form>
 
 
         {loading && <p>Loading tasks...</p>}
@@ -311,6 +350,7 @@ function App() {
         <div className="task-list">
           {tasks.map((task) => (
             <div className="task-card" key={task._id}>
+              
               <h3>{task.title}</h3>
 
               <p>{task.description || "No description"}</p>
@@ -326,7 +366,14 @@ function App() {
               >
                 {task.completed ? "Mark Pending" : "Mark Completed"}
               </button>
-
+              
+              <button
+                type="button"
+                className="login-btn"
+                onClick={() => handleEditTask(task)}
+              >
+                Edit
+              </button>
 
             </div>
           ))}
