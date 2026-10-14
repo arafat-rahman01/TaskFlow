@@ -60,7 +60,43 @@ function App() {
     };
 
   
-    
+    const handleDeleteTask = async (taskId) => {
+      const confirmed = window.confirm(
+        "Are you sure you want to delete this task?"
+      );
+
+      if (!confirmed) return;
+
+      try {
+        const token = localStorage.getItem("token");
+
+        const response = await fetch(
+          `http://localhost:5000/api/tasks/${taskId}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to delete task");
+        }
+
+        setTasks((prevTasks) =>
+          prevTasks.filter((task) => task._id !== taskId)
+        );
+
+        alert("Task deleted successfully!");
+      } catch (error) {
+        console.error("Delete task error:", error);
+        alert(error.message || "Something went wrong");
+      }
+    };
+
   useEffect(() => {
     if (page !== "dashboard") return;
 
@@ -366,7 +402,15 @@ function App() {
               >
                 {task.completed ? "Mark Pending" : "Mark Completed"}
               </button>
-              
+
+              <button
+                type="button"
+                className="start-btn"
+                onClick={() => handleDeleteTask(task._id)}
+              >
+                Delete
+              </button>
+
               <button
                 type="button"
                 className="login-btn"
