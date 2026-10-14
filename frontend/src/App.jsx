@@ -422,11 +422,17 @@ function App() {
               <h3>{task.title}</h3>
 
               <p>{task.description || "No description"}</p>
-
-              <p>
-                Status: {task.completed ? "Completed" : "Pending"}
-              </p>
-              
+             
+            <p>
+              Status:{" "}
+              <span
+                className={`status-badge ${
+                  task.completed ? "completed" : "pending"
+                }`}
+              >
+                {task.completed ? "Completed" : "Pending"}
+              </span>
+            </p>
               
               <button
                 type="button"
