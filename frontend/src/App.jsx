@@ -261,22 +261,148 @@ function App() {
     </main>
     )}
 
+{page === "register" && (
+  <main className="hero">
+    <h1>Create Your Account</h1>
 
-      {page === "register" && (
-        <main className="hero">
-          <h1>Create Your Account</h1>
-          <p className="description">
-            Registration page will be built here.
-          </p>
-          <button
-            className="start-btn"
-            onClick={() => setPage("home")}
-          >
-            Back to Home
-          </button>
-        </main>
-      )}
+    <p className="description">
+      Register to start managing your academic tasks.
+    </p>
 
+    {registerError && (
+      <p style={{ color: "red" }}>{registerError}</p>
+    )}
+
+    {registerSuccess && (
+      <p style={{ color: "green" }}>{registerSuccess}</p>
+    )}
+
+    <form
+      className="login-form"
+      onSubmit={async (e) => {
+        e.preventDefault();
+
+        setRegisterError("");
+        setRegisterSuccess("");
+
+        if (name.trim().length < 2) {
+          setRegisterError("Name must contain at least 2 characters.");
+          return;
+        }
+
+        if (password.length < 6) {
+          setRegisterError("Password must be at least 6 characters.");
+          return;
+        }
+
+        setRegisterLoading(true);
+
+        try {
+          const response = await fetch(
+            "http://localhost:5000/api/auth/register",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                name: name.trim(),
+                email: email.trim(),
+                password,
+              }),
+            }
+          );
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(
+              data.message || "Registration failed."
+            );
+          }
+
+          setRegisterSuccess(
+            "Registration successful! Please log in."
+          );
+
+          setName("");
+          setEmail("");
+          setPassword("");
+
+          setTimeout(() => {
+            setRegisterSuccess("");
+            setPage("login");
+          }, 1200);
+        } catch (err) {
+          setRegisterError(
+            err.message || "Cannot connect to server."
+          );
+        } finally {
+          setRegisterLoading(false);
+        }
+      }}
+    >
+      <input
+        type="text"
+        placeholder="Enter your full name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        minLength={2}
+        required
+      />
+
+      <input
+        type="email"
+        placeholder="Enter your email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
+
+      <input
+        type="password"
+        placeholder="Create a password (minimum 6 characters)"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        minLength={6}
+        required
+      />
+
+      <button
+        type="submit"
+        className="start-btn"
+        disabled={registerLoading}
+      >
+        {registerLoading ? "Creating Account..." : "Register"}
+      </button>
+    </form>
+
+    <p className="description">
+      Already have an account?
+    </p>
+
+    <button
+      type="button"
+      className="login-btn"
+      onClick={() => {
+        setRegisterError("");
+        setRegisterSuccess("");
+        setPage("login");
+      }}
+    >
+      Go to Login
+    </button>
+
+    <button
+      type="button"
+      className="login-btn"
+      onClick={() => setPage("home")}
+      style={{ marginTop: "10px" }}
+    >
+      Back to Home
+    </button>
+  </main>
+)}
       
       
     {page === "dashboard" && (
