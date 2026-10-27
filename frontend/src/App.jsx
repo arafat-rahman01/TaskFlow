@@ -20,6 +20,8 @@ function App() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [editingTaskId, setEditingTaskId] = useState(null);
+  const [priority, setPriority] = useState("Medium");
+  const [deadline, setDeadline] = useState("");
 
   const token = () => localStorage.getItem("token");
 
