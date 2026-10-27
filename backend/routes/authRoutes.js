@@ -112,7 +112,14 @@ router.post("/login", async (req, res) => {
         const token = jwt.sign(
             { userId: user._id.toString() },
             process.env.JWT_SECRET,
-            { expiresIn: "1h" }
+            { expiresIn: "4h" }
+        );
+
+        console.log("New token issued at:", new Date().toISOString());
+
+        console.log(
+            "New token expires at:",
+            new Date(jwt.decode(token).exp * 1000).toISOString()
         );
 
         console.log("User logged in successfully");

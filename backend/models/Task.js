@@ -1,3 +1,4 @@
+
 const mongoose = require("mongoose");
 
 const taskSchema = new mongoose.Schema(
@@ -11,6 +12,17 @@ const taskSchema = new mongoose.Schema(
         description: {
             type: String,
             default: ""
+        },
+
+        priority: {
+            type: String,
+            enum: ["Low", "Medium", "High"],
+            default: "Medium"
+        },
+
+        deadline: {
+            type: Date,
+            default: null
         },
 
         completed: {
