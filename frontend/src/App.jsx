@@ -66,12 +66,20 @@ function App() {
     }
   };
 
-  const handleEditTask = (task) => {
-    setEditingTaskId(task._id);
-    setTitle(task.title || "");
-    setDescription(task.description || "");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+ 
+const handleEditTask = (task) => {
+  setEditingTaskId(task._id);
+  setTitle(task.title || "");
+  setDescription(task.description || "");
+  setPriority(task.priority || "Medium");
+
+  setDeadline(
+    task.deadline ? new Date(task.deadline).toISOString().slice(0, 10) : ""
+  );
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
 
   const handleDeleteTask = async (taskId) => {
     if (!window.confirm("Delete this task? This action cannot be undone.")) return;
