@@ -515,7 +515,26 @@ const handleEditTask = (task) => {
                 }}>
                   <label htmlFor="task-title">Task title</label>
                   <input id="task-title" type="text" placeholder="e.g. Finish project proposal" value={title} onChange={(e) => setTitle(e.target.value)} required />
-                  <label htmlFor="task-description">Description <span className="optional-label">Optional</span></label>
+                  <label htmlFor="task-priority">Priority</label>
+                  <select
+                    id="task-priority"
+                    value={priority}
+                    onChange={(e) => setPriority(e.target.value)}
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                  </select>
+
+                  <label htmlFor="task-deadline">
+                    Deadline <span className="optional-label">Optional</span>
+                  </label>
+                  <input
+                    id="task-deadline"
+                    type="date"
+                    value={deadline}
+                    onChange={(e) => setDeadline(e.target.value)}
+                  />
                   <textarea id="task-description" placeholder="Add a few details..." rows="4" value={description} onChange={(e) => setDescription(e.target.value)} />
                   <button className="button button-primary button-full" type="submit">
                     {editingTaskId ? "Save changes" : "Add to my tasks"} <span aria-hidden="true">→</span>
