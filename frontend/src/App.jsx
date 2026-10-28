@@ -458,7 +458,17 @@ const handleEditTask = (task) => {
                           <h3>{task.title}</h3>
                           <span className={`status-pill ${task.completed ? "status-completed" : "status-pending"}`}>{task.completed ? "Completed" : "In progress"}</span>
                         </div>
-                        <p className="task-description">{task.description || "No description added for this task."}</p>
+                        <div className="task-details">
+                          <span className={`priority-badge priority-${(task.priority || "Medium").toLowerCase()}`}>
+                            Priority: {task.priority || "Medium"}
+                          </span>
+
+                          {task.deadline && (
+                            <span className="deadline-badge">
+                              📅 Deadline: {new Date(task.deadline).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
                         <div className="task-card-footer">
                           <span className="task-meta"><span>◷</span> Personal task</span>
                           <div className="task-actions">
