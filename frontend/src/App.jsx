@@ -30,6 +30,8 @@ function App() {
     setTasks([]);
     setTitle("");
     setDescription("");
+    setPriority("Medium");
+    setDeadline("");
     setEditingTaskId(null);
     setFilter("All");
     setSearch("");
@@ -516,6 +518,8 @@ const handleEditTask = (task) => {
                     }
                     setTitle("");
                     setDescription("");
+                    setPriority("Medium");
+                    setDeadline("");
                     setEditingTaskId(null);
                     setFilter("All");
                     setSearch("");
