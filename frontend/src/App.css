@@ -429,3 +429,33 @@ button:disabled { opacity: .65; cursor: wait; transform: none; }
   border-color: #8170df;
   box-shadow: 0 0 0 3px rgba(129, 112, 223, 0.12);
 }
+
+
+/* Sort Dropdown */
+.sort-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #625d75;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sort-select select {
+  min-height: 40px;
+  max-width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #dedee8;
+  border-radius: 9px;
+  background: #fff;
+  color: #28243b;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.sort-select select:focus {
+  outline: none;
+  border-color: #8170df;
+  box-shadow: 0 0 0 3px rgba(129, 112, 223, 0.12);
+}

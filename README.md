@@ -1,124 +1,78 @@
 # TaskFlow — Student Task and Project Management System
 
-TaskFlow is a MERN stack web application designed to help university students organize academic tasks, manage project work, and track task completion in one place.
+TaskFlow is a MERN stack web application designed to help students organize, manage, and track their academic tasks efficiently.
 
 ## Features
 
-- User registration and login
-- Password hashing using bcryptjs
-- JWT-based authentication
-- Create new tasks
-- View personal tasks
-- Edit existing tasks
-- Delete tasks
-- Mark tasks as completed or pending
-- Filter tasks by status
-- Responsive user interface
+- **User Authentication:** Register and log in securely.
+- **Task Management:** Create, view, edit, and delete personal tasks.
+- **Task Status:** Mark tasks as completed or pending.
+- **Priority Management:** Assign Low, Medium, or High priority to tasks.
+- **Deadline Management:** Set and update task deadlines.
+- **Search:** Find tasks by title.
+- **Filtering:** Filter tasks by status.
+- **Sorting:** Sort tasks by newest first, priority, or earliest deadline.
+- **Responsive UI:** Use the application on desktop and mobile screens.
+- **Task Ownership:** Users can access and manage their own tasks.
 
-## Technologies Used
+## Technology Stack
 
-**Frontend**
-- React.js
-- Vite
-- HTML and CSS
-- JavaScript
-
-**Backend**
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- bcryptjs
-- JSON Web Token (JWT)
+| Layer | Technologies |
+|---|---|
+| Frontend | React, Vite, CSS |
+| Backend | Node.js, Express.js |
+| Database | MongoDB, Mongoose |
+| Authentication | JSON Web Token (JWT) |
+| Password Security | bcryptjs |
+| API Testing | Hoppscotch, PowerShell |
 
 ## Project Structure
 
-    TaskFlow/
-    ├── backend/
-    │   ├── models/
-    │   ├── routes/
-    │   ├── middleware/
-    │   ├── server.js
-    │   ├── db.js
-    │   └── package.json
-    ├── frontend/
-    │   ├── src/
-    │   │   ├── App.jsx
-    │   │   └── App.css
-    │   └── package.json
-    └── README.md
+```text
+TaskFlow/
+├── backend/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   ├── db.js
+│   ├── server.js
+│   └── .env
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   └── index.html
+└── README.md
+```
 
-## Installation and Setup
+## Prerequisites
 
-### Prerequisites
+Install the following before running the project:
 
 - Node.js and npm
 - MongoDB
-- Git (optional)
+- Git (optional, for version control)
 
-### 1. Clone the repository
+## Installation and Setup
 
-    git clone YOUR_GITHUB_REPOSITORY_URL
-    cd TaskFlow
+### 1. Clone the Repository
 
-### 2. Configure the backend
+```bash
+git clone YOUR_GITHUB_REPOSITORY_URL
+cd TaskFlow
+```
 
-    cd backend
-    npm install
+Replace `YOUR_GITHUB_REPOSITORY_URL` with your actual GitHub repository URL.
 
-Create a `.env` file inside the backend folder and configure:
+### 2. Configure the Backend
 
-    PORT=5000
-    MONGO_URI=mongodb://127.0.0.1:27017/taskflow
-    JWT_SECRET=replace_with_a_long_random_secret
+```bash
+cd backend
+npm install
+```
 
-Use your existing environment variable names if they differ. Never commit `.env` or real secrets to GitHub.
+Create a `.env` file inside the `backend` folder:
 
-### 3. Start the backend
-
-    npm run dev
-
-The backend runs on port 5000 unless configured otherwise.
-
-### 4. Start the frontend
-
-Open a second terminal:
-
-    cd frontend
-    npm install
-    npm run dev
-
-Open the local URL displayed by Vite in your browser.
-
-## API Endpoints
-
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/auth/register` | Register a new user |
-| POST | `/api/auth/login` | Authenticate a user |
-| GET | `/api/auth/me` | Get authenticated user information |
-| POST | `/api/tasks` | Create a task |
-| GET | `/api/tasks` | Retrieve the user's tasks |
-| PUT | `/api/tasks/:id` | Update a task |
-| DELETE | `/api/tasks/:id` | Delete a task |
-
-Protected endpoints require a valid JWT access token in the Authorization header.
-
-## Security
-
-- Passwords are hashed before storage.
-- JWT authentication protects private routes.
-- Task access should be restricted to the authenticated task owner.
-- Environment variables are used for database configuration and JWT secrets.
-
-## Future Improvements
-
-- Task deadlines and reminders
-- Task priority levels
-- Search and sorting
-- Improved mobile interface
-- Deployment to a production environment
-
-## Author
-
-Developed as a university Software Engineering lab project.
+```env
+PORT=5000
+MONGO_URI=m
