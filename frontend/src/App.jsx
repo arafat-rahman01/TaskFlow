@@ -492,7 +492,7 @@ const handleEditTask = (task) => {
                     const response = await fetch(isEditing ? `${API_BASE}/api/tasks/${editingTaskId}` : `${API_BASE}/api/tasks`, {
                       method: isEditing ? "PUT" : "POST",
                       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
-                      body: JSON.stringify({ title: title.trim(), description: description.trim() }),
+                      body: JSON.stringify({title: title.trim(),description: description.trim(),priority,deadline: deadline || null}),
                     });
                     const data = await response.json();
                     if (!response.ok) throw new Error(data.message || "Failed to save task.");
