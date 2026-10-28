@@ -17,6 +17,7 @@ function App() {
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [editingTaskId, setEditingTaskId] = useState(null);
@@ -143,6 +144,30 @@ const handleEditTask = (task) => {
       (task.description || "").toLowerCase().includes(query);
     return matchesStatus && matchesSearch;
   });
+
+  const sortedTasks = [...filteredTasks].sort((a, b) => {
+  if (sortBy === "priority") {
+    const priorityOrder = {
+      High: 3,
+      Medium: 2,
+      Low: 1,
+    };
+
+    return (
+      (priorityOrder[b.priority || "Medium"] || 2) -
+      (priorityOrder[a.priority || "Medium"] || 2)
+    );
+  }
+
+  if (sortBy === "deadline") {
+    if (!a.deadline) return 1;
+    if (!b.deadline) return -1;
+
+    return new Date(a.deadline) - new Date(b.deadline);
+  }
+
+  return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+});
 
   const openRegister = () => {
     setRegisterError("");
@@ -435,6 +460,17 @@ const handleEditTask = (task) => {
                   <span aria-hidden="true">⌕</span>
                   <input type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search tasks..." aria-label="Search tasks" />
                 </label>
+                <label className="sort-select">
+                <span>Sort by</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                >
+                  <option value="newest">Newest first</option>
+                  <option value="priority">Priority: High to Low</option>
+                  <option value="deadline">Deadline: Earliest first</option>
+                </select>
+              </label>
               </div>
 
               {loading && <div className="state-card"><span className="spinner" />Loading your tasks...</div>}
@@ -450,7 +486,7 @@ const handleEditTask = (task) => {
 
               {!loading && !error && filteredTasks.length > 0 && (
                 <div className="task-list">
-                  {filteredTasks.map((task) => (
+                  {sortedTasks.map((task) => (
                     <article className={`task-card ${task.completed ? "task-card-done" : ""}`} key={task._id}>
                       <button className={`task-check ${task.completed ? "is-checked" : ""}`} type="button" aria-label={task.completed ? "Mark task pending" : "Mark task completed"} onClick={() => handleToggleTask(task)}>
                         {task.completed ? "✓" : ""}
@@ -553,7 +589,7 @@ const handleEditTask = (task) => {
                   <button className="button button-primary button-full" type="submit">
                     {editingTaskId ? "Save changes" : "Add to my tasks"} <span aria-hidden="true">→</span>
                   </button>
-                  {editingTaskId && <button className="button button-secondary button-full" type="button" onClick={() => { setEditingTaskId(null); setTitle(""); setDescription(""); }}>Cancel edit</button>}
+                  {editingTaskId && <button className="button button-secondary button-full" type="button" onClick={() => { setEditingTaskId(null); setTitle(""); setDescription(""); setPriority("Medium"); setDeadline("");}}>Cancel edit</button>}
                 </form>
               </section>
 
