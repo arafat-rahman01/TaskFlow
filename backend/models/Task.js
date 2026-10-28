@@ -41,6 +41,7 @@ const taskSchema = new mongoose.Schema(
         ref: "Project",
         default: null
         },
+        
         assignedTo: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",

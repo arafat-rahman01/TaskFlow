@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const Project = require("../models/Project");
 const User = require("../models/User");
 const authMiddleware = require("../middleware/authMiddleware");
+const Task = require("../models/Task");
 
 const router = express.Router();
 
@@ -206,6 +207,66 @@ router.post("/:id/members", authMiddleware, async (req, res) => {
     console.error("Add team member error:", error);
     return res.status(500).json({
       message: "Server error while adding team member",
+    });
+  }
+});
+
+// Assign a task to a project member (owner only)
+router.post("/:id/tasks", authMiddleware, async (req, res) => {
+  try {
+    const { title, description, priority, deadline, assignedTo } = req.body;
+
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: "Invalid project ID" });
+    }
+
+    if (!title || !title.trim()) {
+      return res.status(400).json({ message: "Task title is required" });
+    }
+
+    const project = await Project.findOne({
+      _id: req.params.id,
+      owner: req.userId,
+    });
+
+    if (!project) {
+      return res.status(404).json({
+        message: "Project not found or you are not the owner",
+      });
+    }
+
+    if (!assignedTo || !mongoose.isValidObjectId(assignedTo)) {
+      return res.status(400).json({ message: "Valid assignee ID is required" });
+    }
+
+    const isMember = project.members.some(
+      (id) => id.toString() === assignedTo
+    );
+
+    if (!isMember) {
+      return res.status(400).json({
+        message: "Assignee must be a project member",
+      });
+    }
+
+    const task = await Task.create({
+      title: title.trim(),
+      description: description || "",
+      priority: priority || "Medium",
+      deadline: deadline || null,
+      user: req.userId,
+      project: project._id,
+      assignedTo,
+    });
+
+    return res.status(201).json({
+      message: "Task assigned successfully",
+      task,
+    });
+  } catch (error) {
+    console.error("Assign task error:", error);
+    return res.status(500).json({
+      message: "Server error while assigning task",
     });
   }
 });
