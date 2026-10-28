@@ -271,4 +271,43 @@ router.post("/:id/tasks", authMiddleware, async (req, res) => {
   }
 });
 
+ // Get all tasks of a project (owner or member)
+router.get("/:id/tasks", authMiddleware, async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: "Invalid project ID" });
+    }
+
+    const project = await Project.findOne({
+      _id: req.params.id,
+      $or: [
+        { owner: req.userId },
+        { members: req.userId },
+      ],
+    });
+
+    if (!project) {
+      return res.status(404).json({
+        message: "Project not found or access denied",
+      });
+    }
+
+    const tasks = await Task.find({ project: project._id })
+      .populate("assignedTo", "name email")
+      .populate("user", "name email")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      message: "Project tasks fetched successfully",
+      count: tasks.length,
+      tasks,
+    });
+  } catch (error) {
+    console.error("Fetch project tasks error:", error);
+    return res.status(500).json({
+      message: "Server error while fetching project tasks",
+    });
+  }
+});
+
 module.exports = router;
