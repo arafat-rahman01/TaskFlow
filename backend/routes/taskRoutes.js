@@ -1,11 +1,12 @@
 
 const express = require("express");
 const Task = require("../models/Task");
+const Project = require("../models/Project");
 const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// Create a new task
+// Create a new personal task
 router.post("/", authMiddleware, async (req, res) => {
     try {
         const { title, description, priority, deadline } = req.body;
@@ -37,11 +38,12 @@ router.post("/", authMiddleware, async (req, res) => {
     }
 });
 
-// Get all tasks of logged-in user
+// Get all personal tasks of logged-in user
 router.get("/", authMiddleware, async (req, res) => {
     try {
         const tasks = await Task.find({
-            user: req.userId
+            user: req.userId,
+            project: null
         }).sort({ createdAt: -1 });
 
         return res.status(200).json({
@@ -61,7 +63,13 @@ router.get("/", authMiddleware, async (req, res) => {
 // Update a task
 router.put("/:id", authMiddleware, async (req, res) => {
     try {
-        const { title, description, completed, priority, deadline } = req.body;
+        const {
+            title,
+            description,
+            completed,
+            priority,
+            deadline
+        } = req.body;
 
         const updates = {};
 
@@ -71,6 +79,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
                     message: "Task title is required"
                 });
             }
+
             updates.title = title.trim();
         }
 
@@ -79,6 +88,12 @@ router.put("/:id", authMiddleware, async (req, res) => {
         }
 
         if (completed !== undefined) {
+            if (typeof completed !== "boolean") {
+                return res.status(400).json({
+                    message: "Completed must be true or false"
+                });
+            }
+
             updates.completed = completed;
         }
 
@@ -90,11 +105,86 @@ router.put("/:id", authMiddleware, async (req, res) => {
             updates.deadline = deadline || null;
         }
 
-        const task = await Task.findOneAndUpdate(
-            {
-                _id: req.params.id,
-                user: req.userId
-            },
+        if (Object.keys(updates).length === 0) {
+            return res.status(400).json({
+                message: "No update data provided"
+            });
+        }
+
+        // Find the task
+        const existingTask = await Task.findById(req.params.id);
+
+        if (!existingTask) {
+            return res.status(404).json({
+                message: "Task not found"
+            });
+        }
+
+        // PERSONAL TASK
+        if (!existingTask.project) {
+            if (String(existingTask.user) !== String(req.userId)) {
+                return res.status(403).json({
+                    message: "You are not authorized to update this task"
+                });
+            }
+        }
+
+        // PROJECT TASK
+        else {
+            const project = await Project.findById(existingTask.project);
+
+            if (!project) {
+                return res.status(404).json({
+                    message: "Project not found"
+                });
+            }
+
+            const isOwner =
+                String(project.owner) === String(req.userId);
+
+            const isProjectMember = project.members.some(
+                member => String(member) === String(req.userId)
+            );
+
+            const isAssignedMember =
+                String(existingTask.assignedTo) === String(req.userId);
+
+            // Project owner can update all task information
+            if (isOwner) {
+                // Owner permission
+            }
+
+            // Assigned member can only update completion status
+            else if (isProjectMember && isAssignedMember) {
+                const allowedFields = ["completed"];
+
+                const hasUnauthorizedField = Object.keys(updates).some(
+                    field => !allowedFields.includes(field)
+                );
+
+                if (hasUnauthorizedField) {
+                    return res.status(403).json({
+                        message: "Members can only update task completion status"
+                    });
+                }
+
+                if (completed === undefined) {
+                    return res.status(400).json({
+                        message: "Only task completion status can be updated"
+                    });
+                }
+            }
+
+            // Other users cannot update project tasks
+            else {
+                return res.status(403).json({
+                    message: "You are not authorized to update this project task"
+                });
+            }
+        }
+
+        const task = await Task.findByIdAndUpdate(
+            req.params.id,
             updates,
             {
                 new: true,
@@ -102,20 +192,18 @@ router.put("/:id", authMiddleware, async (req, res) => {
             }
         );
 
-        if (!task) {
-            return res.status(404).json({
-                message: "Task not found"
-            });
-        }
-
         return res.status(200).json({
             message: "Task updated successfully",
             task
         });
+
     } catch (error) {
         console.error("Update task error:", error);
 
-        if (error.name === "ValidationError" || error.name === "CastError") {
+        if (
+            error.name === "ValidationError" ||
+            error.name === "CastError"
+        ) {
             return res.status(400).json({
                 message: "Invalid task data. Check priority and deadline."
             });
