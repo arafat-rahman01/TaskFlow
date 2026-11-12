@@ -184,14 +184,39 @@ const handleEditTask = (task) => {
         </button>
 
         <div className="nav-actions">
-          {page === "dashboard" ? (
-            <>
-              <span className="nav-status"><span className="online-dot" /> Workspace</span>
-              <button className="button button-ghost nav-logout" type="button" onClick={handleLogout}>
-                Log out
-              </button>
-            </>
-          ) : (
+          
+        {page === "dashboard" || page === "projects" ? (
+          <>
+            <button
+              className={`button ${page === "dashboard" ? "button-primary" : "button-ghost"}`}
+              type="button"
+              onClick={() => setPage("dashboard")}
+            >
+              Dashboard
+            </button>
+
+            <button
+              className={`button ${page === "projects" ? "button-primary" : "button-ghost"}`}
+              type="button"
+              onClick={() => setPage("projects")}
+            >
+              Projects
+            </button>
+
+            <span className="nav-status">
+              <span className="online-dot" /> Workspace
+            </span>
+
+            <button
+              className="button button-ghost nav-logout"
+              type="button"
+              onClick={handleLogout}
+            >
+              Log out
+            </button>
+          </>
+        ) : (
+
             <>
               {page !== "home" && (
                 <button className="button button-ghost nav-back" type="button" onClick={() => setPage("home")}>
@@ -606,6 +631,35 @@ const handleEditTask = (task) => {
           <footer className="dashboard-footer"><span className="footer-brand-mark">T</span><span>TaskFlow</span><span className="footer-dot">•</span><span>One task at a time.</span><button type="button" onClick={handleLogout}>Log out</button></footer>
         </main>
       )}
+
+
+{page === "projects" && (
+  <main className="dashboard-page">
+    <section className="dashboard-heading">
+      <div>
+        <p className="eyebrow">
+          <span className="eyebrow-dot" /> YOUR WORKSPACE
+        </p>
+        <h1>My Projects<span className="heading-period">.</span></h1>
+        <p className="dashboard-subtitle">
+          Manage your group projects and collaborate with teammates.
+        </p>
+      </div>
+
+      <button className="button button-primary" type="button">
+        + Create New Project
+      </button>
+    </section>
+
+    <section className="empty-state">
+      <div className="empty-icon">▦</div>
+      <h3>Your projects will appear here</h3>
+      <p>Create a project and start collaborating with your team.</p>
+    </section>
+  </main>
+)}
+
+
     </div>
   );
 }
