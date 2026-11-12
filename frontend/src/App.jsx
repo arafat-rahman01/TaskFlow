@@ -653,23 +653,11 @@ function App() {
     }
   };
 
+  
   // =========================
   // UPDATE PROJECT TASK STATUS
   // =========================
   const handleToggleProjectTask = async (task) => {
-    const creatorId =
-      typeof task.user === "object" ? task.user?._id : task.user;
-
-    if (
-      !currentUserId ||
-      String(creatorId) !== String(currentUserId)
-    ) {
-      alert(
-        "Only the task creator can update this task with the current backend permissions."
-      );
-      return;
-    }
-
     try {
       const response = await fetch(
         `${API_BASE}/api/tasks/${task._id}`,
@@ -702,6 +690,7 @@ function App() {
       alert(err.message || "Could not update project task.");
     }
   };
+
 
   // =========================
   // PROJECT PROGRESS
@@ -2101,14 +2090,19 @@ function App() {
             ) : (
               <div className="task-list" style={{ marginTop: "22px" }}>
                 {projectTasks.map((task) => {
-                  const creatorId =
-                    typeof task.user === "object"
-                      ? task.user?._id
-                      : task.user;
+                  
+                    const assignedMemberId =
+                      typeof task.assignedTo === "object"
+                        ? task.assignedTo?._id
+                        : task.assignedTo;
 
-                  const canUpdate =
-                    currentUserId &&
-                    String(creatorId) === String(currentUserId);
+                    const canUpdate =
+                      isProjectOwner(selectedProject) ||
+                      (
+                        currentUserId &&
+                        assignedMemberId &&
+                        String(assignedMemberId) === String(currentUserId)
+                      );
 
                   const assignedMember =
                     typeof task.assignedTo === "object"
