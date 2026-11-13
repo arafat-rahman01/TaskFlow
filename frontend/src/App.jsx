@@ -1,5 +1,5 @@
-
 import { useState, useEffect } from "react";
+import { io } from "socket.io-client";
 import "./App.css";
 
 const API_BASE = "http://localhost:5000";
@@ -522,6 +522,124 @@ function App() {
   };
 
   // =========================
+  // REAL-TIME COLLABORATION
+  // =========================
+  useEffect(() => {
+    const savedToken = token();
+
+    if (
+      !savedToken ||
+      !["dashboard", "projects", "projectDetails"].includes(page)
+    ) {
+      return;
+    }
+
+    const activeProjectId =
+      page === "projectDetails" ? selectedProject?._id : null;
+
+    const socket = io(API_BASE, {
+      auth: {
+        token: savedToken,
+      },
+    });
+
+    const joinActiveProject = () => {
+      if (activeProjectId) {
+        socket.emit("joinProject", activeProjectId);
+      }
+    };
+
+    const refreshCurrentProject = async () => {
+      if (!activeProjectId) return;
+
+      try {
+        const response = await fetch(`${API_BASE}/api/projects`, {
+          headers: {
+            Authorization: `Bearer ${savedToken}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Could not refresh project.");
+        }
+
+        const latestProjects = data.projects || [];
+        setProjects(latestProjects);
+
+        const latestProject = latestProjects.find(
+          (project) => String(project._id) === String(activeProjectId)
+        );
+
+        if (latestProject) {
+          setSelectedProject(latestProject);
+        }
+      } catch (err) {
+        console.error("Real-time project refresh error:", err.message);
+      }
+    };
+
+    const refreshTasksForCurrentProject = (payload) => {
+      if (
+        !activeProjectId ||
+        String(payload?.projectId) !== String(activeProjectId)
+      ) {
+        return;
+      }
+
+      fetchProjectTasks(activeProjectId);
+    };
+
+    const handleProjectDeleted = (payload) => {
+      if (
+        !activeProjectId ||
+        String(payload?.projectId) !== String(activeProjectId)
+      ) {
+        return;
+      }
+
+      setSelectedProject(null);
+      setProjectTasks([]);
+      setPage("projects");
+      fetchProjects();
+    };
+
+    const handleSocketError = (payload) => {
+      setProjectTaskMessage(
+        payload?.message || "A real-time collaboration error occurred."
+      );
+    };
+
+    socket.on("connect", joinActiveProject);
+    socket.on("connect_error", (err) => {
+      console.error("Socket connection error:", err.message);
+    });
+
+    socket.on("taskCreated", refreshTasksForCurrentProject);
+    socket.on("taskUpdated", refreshTasksForCurrentProject);
+    socket.on("taskDeleted", refreshTasksForCurrentProject);
+
+    socket.on("memberAdded", refreshCurrentProject);
+    socket.on("projectUpdated", refreshCurrentProject);
+    socket.on("projectDeleted", handleProjectDeleted);
+    socket.on("socketError", handleSocketError);
+
+    if (socket.connected) {
+      joinActiveProject();
+    }
+
+    return () => {
+      if (activeProjectId && socket.connected) {
+        socket.emit("leaveProject", activeProjectId);
+      }
+
+      socket.removeAllListeners();
+      socket.disconnect();
+    };
+  }, [page, selectedProject?._id]);
+
+  // =========================
   // ADD PROJECT MEMBER
   // =========================
   const handleAddMember = async (e) => {
@@ -653,7 +771,7 @@ function App() {
     }
   };
 
-  
+
   // =========================
   // UPDATE PROJECT TASK STATUS
   // =========================
@@ -1038,7 +1156,6 @@ function App() {
                 autoComplete="current-password"
                 required
               />
-
               <button
                 className="button button-primary button-full"
                 type="submit"
@@ -1117,7 +1234,7 @@ function App() {
 
                 if (password.length < 6) {
                   setRegisterError(
-                    "Password must be at least 6 characters."
+                    "Password must contain at least 6 characters."
                   );
                   return;
                 }
@@ -1781,6 +1898,7 @@ function App() {
         </main>
       )}
 
+      
       {/* =========================
           PROJECT DETAILS PAGE
       ========================= */}
@@ -1806,7 +1924,8 @@ function App() {
               </h1>
 
               <p className="dashboard-subtitle">
-                {selectedProject.description || "Project details and team workspace."}
+                {selectedProject.description ||
+                  "Project details and team workspace."}
               </p>
             </div>
 
@@ -1860,7 +1979,10 @@ function App() {
           </section>
 
           {/* PROJECT PROGRESS BAR */}
-          <section className="create-card" style={{ marginBottom: "28px" }}>
+          <section
+            className="create-card"
+            style={{ marginBottom: "28px" }}
+          >
             <div className="section-heading">
               <div>
                 <span className="section-kicker">PROJECT OVERVIEW</span>
@@ -1869,7 +1991,10 @@ function App() {
               <strong>{projectProgress}%</strong>
             </div>
 
-            <div className="focus-progress-track" style={{ marginTop: "20px" }}>
+            <div
+              className="focus-progress-track"
+              style={{ marginTop: "20px" }}
+            >
               <span style={{ width: `${projectProgress}%` }} />
             </div>
 
@@ -1879,7 +2004,10 @@ function App() {
           </section>
 
           {/* TEAM MEMBERS */}
-          <section className="create-card" style={{ marginBottom: "28px" }}>
+          <section
+            className="create-card"
+            style={{ marginBottom: "28px" }}
+          >
             <div className="create-card-heading">
               <span className="create-icon">♙</span>
               <div>
@@ -1957,7 +2085,10 @@ function App() {
                 </form>
 
                 {memberMessage && (
-                  <div className="form-alert form-alert-success" role="status">
+                  <div
+                    className="form-alert form-alert-success"
+                    role="status"
+                  >
                     {memberMessage}
                   </div>
                 )}
@@ -1987,7 +2118,10 @@ function App() {
             </div>
 
             {projectTaskMessage && (
-              <div className="form-alert form-alert-success" role="status">
+              <div
+                className="form-alert form-alert-success"
+                role="status"
+              >
                 {projectTaskMessage}
               </div>
             )}
@@ -2017,14 +2151,18 @@ function App() {
                   rows="3"
                   placeholder="Task details"
                   value={projectTaskDescription}
-                  onChange={(e) => setProjectTaskDescription(e.target.value)}
+                  onChange={(e) =>
+                    setProjectTaskDescription(e.target.value)
+                  }
                 />
 
                 <label htmlFor="project-task-priority">Priority</label>
                 <select
                   id="project-task-priority"
                   value={projectTaskPriority}
-                  onChange={(e) => setProjectTaskPriority(e.target.value)}
+                  onChange={(e) =>
+                    setProjectTaskPriority(e.target.value)
+                  }
                 >
                   <option value="Low">Low</option>
                   <option value="Medium">Medium</option>
@@ -2036,7 +2174,9 @@ function App() {
                   id="project-task-deadline"
                   type="date"
                   value={projectTaskDeadline}
-                  onChange={(e) => setProjectTaskDeadline(e.target.value)}
+                  onChange={(e) =>
+                    setProjectTaskDeadline(e.target.value)
+                  }
                 />
 
                 <label htmlFor="assign-member">Assign to member</label>
@@ -2090,19 +2230,18 @@ function App() {
             ) : (
               <div className="task-list" style={{ marginTop: "22px" }}>
                 {projectTasks.map((task) => {
-                  
-                    const assignedMemberId =
-                      typeof task.assignedTo === "object"
-                        ? task.assignedTo?._id
-                        : task.assignedTo;
+                  const assignedMemberId =
+                    typeof task.assignedTo === "object"
+                      ? task.assignedTo?._id
+                      : task.assignedTo;
 
-                    const canUpdate =
-                      isProjectOwner(selectedProject) ||
-                      (
-                        currentUserId &&
-                        assignedMemberId &&
-                        String(assignedMemberId) === String(currentUserId)
-                      );
+                  const canUpdate =
+                    isProjectOwner(selectedProject) ||
+                    (
+                      currentUserId &&
+                      assignedMemberId &&
+                      String(assignedMemberId) === String(currentUserId)
+                    );
 
                   const assignedMember =
                     typeof task.assignedTo === "object"
@@ -2193,7 +2332,10 @@ function App() {
             <span>TaskFlow</span>
             <span className="footer-dot">•</span>
             <span>One team, one goal.</span>
-            <button type="button" onClick={() => setPage("projects")}>
+            <button
+              type="button"
+              onClick={() => setPage("projects")}
+            >
               Back to Projects
             </button>
           </footer>

@@ -1,4 +1,3 @@
-
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
@@ -10,16 +9,24 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendEmail = async ({ to, subject, html }) => {
-    const info = await transporter.sendMail({
-        from: `"TaskFlow" <${process.env.EMAIL_USER}>`,
-        to,
-        subject,
-        html
-    });
+    try {
+        console.log("Sending email to:", to);
 
-    console.log("Email sent:", info.messageId);
+        const info = await transporter.sendMail({
+            from: `"TaskFlow" <${process.env.EMAIL_USER}>`,
+            to,
+            subject,
+            html
+        });
 
-    return info;
+        console.log("Email sent:", info.messageId);
+
+        return info;
+
+    } catch (error) {
+        console.error("Email sending failed:", error);
+        throw error;
+    }
 };
 
 module.exports = sendEmail;

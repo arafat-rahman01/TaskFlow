@@ -38,7 +38,7 @@ router.post("/", authMiddleware, async (req, res) => {
     }
 });
 
-// Get all personal tasks of logged-in user
+// Get all personal tasks
 router.get("/", authMiddleware, async (req, res) => {
     try {
         const tasks = await Task.find({
@@ -111,7 +111,6 @@ router.put("/:id", authMiddleware, async (req, res) => {
             });
         }
 
-        // Find the task
         const existingTask = await Task.findById(req.params.id);
 
         if (!existingTask) {
@@ -119,6 +118,8 @@ router.put("/:id", authMiddleware, async (req, res) => {
                 message: "Task not found"
             });
         }
+
+        let project = null;
 
         // PERSONAL TASK
         if (!existingTask.project) {
@@ -131,7 +132,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
 
         // PROJECT TASK
         else {
-            const project = await Project.findById(existingTask.project);
+            project = await Project.findById(existingTask.project);
 
             if (!project) {
                 return res.status(404).json({
@@ -149,13 +150,9 @@ router.put("/:id", authMiddleware, async (req, res) => {
             const isAssignedMember =
                 String(existingTask.assignedTo) === String(req.userId);
 
-            // Project owner can update all task information
             if (isOwner) {
-                // Owner permission
-            }
-
-            // Assigned member can only update completion status
-            else if (isProjectMember && isAssignedMember) {
+                // Owner can update all task information
+            } else if (isProjectMember && isAssignedMember) {
                 const allowedFields = ["completed"];
 
                 const hasUnauthorizedField = Object.keys(updates).some(
@@ -173,17 +170,13 @@ router.put("/:id", authMiddleware, async (req, res) => {
                         message: "Only task completion status can be updated"
                     });
                 }
-            }
-
-            // Other users cannot update project tasks
-            else {
+            } else {
                 return res.status(403).json({
                     message: "You are not authorized to update this project task"
                 });
             }
         }
 
-        
         const task = await Task.findByIdAndUpdate(
             req.params.id,
             updates,
@@ -193,6 +186,15 @@ router.put("/:id", authMiddleware, async (req, res) => {
             }
         );
 
+        // Notify connected project members
+        if (project) {
+            const io = req.app.get("io");
+
+            io.to(`project_${project._id}`).emit("taskUpdated", {
+                projectId: String(project._id),
+                task
+            });
+        }
 
         return res.status(200).json({
             message: "Task updated successfully",
@@ -220,20 +222,37 @@ router.put("/:id", authMiddleware, async (req, res) => {
 // Delete a task
 router.delete("/:id", authMiddleware, async (req, res) => {
     try {
-        const task = await Task.findOneAndDelete({
+        const existingTask = await Task.findOne({
             _id: req.params.id,
             user: req.userId
         });
 
-        if (!task) {
+        if (!existingTask) {
             return res.status(404).json({
                 message: "Task not found"
+            });
+        }
+
+        const projectId = existingTask.project
+            ? String(existingTask.project)
+            : null;
+
+        await Task.deleteOne({ _id: existingTask._id });
+
+        // Notify connected project members
+        if (projectId) {
+            const io = req.app.get("io");
+
+            io.to(`project_${projectId}`).emit("taskDeleted", {
+                projectId,
+                taskId: String(existingTask._id)
             });
         }
 
         return res.status(200).json({
             message: "Task deleted successfully"
         });
+
     } catch (error) {
         console.error("Delete task error:", error);
 
