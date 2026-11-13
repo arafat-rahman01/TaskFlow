@@ -183,14 +183,16 @@ router.put("/:id", authMiddleware, async (req, res) => {
             }
         }
 
+        
         const task = await Task.findByIdAndUpdate(
             req.params.id,
             updates,
             {
-                new: true,
+                returnDocument: "after",
                 runValidators: true
             }
         );
+
 
         return res.status(200).json({
             message: "Task updated successfully",
